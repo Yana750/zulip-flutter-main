@@ -207,7 +207,7 @@ class _SubscriptionListHeader extends StatelessWidget {
                 color: designVariables.subscriptionListHeaderText,
               ),
             ),
-            const SizedBox(width: 16),
+            // const SizedBox(width: 16),
           ],
         ),
       ),
