@@ -191,14 +191,7 @@ class _SubscriptionListHeader extends StatelessWidget {
                 Navigator.push(
                   context,
                     MaterialPageRoute(
-                      builder: (context) => CreateChannelScreen(
-                        api: ApiConnection(
-                          realmUrl: Uri.parse("https://tonvas.zulipchat.com/api/v1/channels "), 
-                          zulipFeatureLevel: null,
-                          client: http.Client(),
-                          useBinding: false,
-                        ),
-                      ),
+                      builder: (context) => ChannelCreateVideo(),
                     )
                 );
               },
