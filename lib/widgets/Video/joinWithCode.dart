@@ -33,7 +33,7 @@ class _JoinMeetingScreenState extends State<JoinMeetingScreen> {
     try {
       var options = JitsiMeetConferenceOptions(
         room: meetingId,
-        serverURL: "https://jitsi-connectrm.ru:8443/", // Сервер
+        serverURL: "Введите URL", // Сервер
         configOverrides: {
           "startWithAudioMuted": false,
           "startWithVideoMuted": false,

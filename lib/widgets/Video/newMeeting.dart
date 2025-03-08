@@ -33,7 +33,7 @@ class _MeetingReadyScreenState extends State<MeetingReadyScreen> {
     try {
       var options = JitsiMeetConferenceOptions(
         room: meetingCode,
-        serverURL: "https://jitsi-connectrm.ru:8443/",
+        serverURL: "Введите URL",
         configOverrides: {
           "startWithAudioMuted": false,
           "startWithVideoMuted": false,
