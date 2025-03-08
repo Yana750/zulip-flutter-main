@@ -67,6 +67,7 @@ dependencies:
   jitsi_meet_flutter_sdk: ^10.3.0
   uuid: ^4.5.1
   provider: ^6.1.2
+  supabase_flutter: ^2.8.4
   # Keep list sorted when adding dependencies; it helps prevent merge conflicts.
 
 dependency_overrides:

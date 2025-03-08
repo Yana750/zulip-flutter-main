@@ -5,7 +5,7 @@ import '../api/core.dart';
 import '../api/model/model.dart';
 import '../model/narrow.dart';
 import '../model/unreads.dart';
-import 'Video/ChannelCreate.dart';
+import 'Video/supabaseChannel/ChannelCreate.dart';
 import 'icons.dart';
 import 'message_list.dart';
 import 'store.dart';
@@ -191,7 +191,7 @@ class _SubscriptionListHeader extends StatelessWidget {
                 Navigator.push(
                   context,
                     MaterialPageRoute(
-                      builder: (context) => ChannelCreateVideo(),
+                      builder: (context) => const ChannelCreate(),
                     )
                 );
               },
