@@ -17,10 +17,12 @@ class ConferenceScreen extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () {
                 //Создать новую встречу
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MeetingReadyScreen()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => MeetingReadyScreen(meetingUrl: channel.meetingUrl),
+                //   ),
+                // );
               },
               label: const Text(
                 "Новая встреча",
@@ -44,7 +46,7 @@ class ConferenceScreen extends StatelessWidget {
                 //Подключиться по ссылке
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => JoinMeetingScreen()),
+                  MaterialPageRoute(builder: (context) => const JoinMeetingScreen()),
                 );
               },
               icon: const Icon(Icons.margin),

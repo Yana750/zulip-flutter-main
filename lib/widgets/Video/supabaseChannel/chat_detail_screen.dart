@@ -5,7 +5,7 @@ import 'ChatProvider.dart';
 class ChatDetailScreen extends StatefulWidget {
   final ChatChannel channel;
 
-  const ChatDetailScreen({Key? key, required this.channel}) : super(key: key);
+  const ChatDetailScreen({super.key, required this.channel});
 
   @override
   _ChatDetailScreenState createState() => _ChatDetailScreenState();
@@ -14,13 +14,6 @@ class ChatDetailScreen extends StatefulWidget {
 class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController _messageController = TextEditingController();
 
-  void _startVideoCall(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const MeetingReadyScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,8 +21,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         title: Text(widget.channel.name),
         actions: [
           IconButton(
-            icon: const Icon(Icons.video_call),
-            onPressed: () => _startVideoCall(context),
+            icon: const Icon(Icons.video_call, color: Colors.blueGrey, size: 24,),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const JitsiMeetPage(),
+                ),
+              );
+            },
           ),
         ],
       ),
