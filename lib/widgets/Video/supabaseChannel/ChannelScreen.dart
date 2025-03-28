@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'ChatProvider.dart';
-import 'chat_detail_screen.dart';
+import 'ChatDetailScreen.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
@@ -39,6 +39,7 @@ class ChatScreen extends StatelessWidget {
 
   void _showCreateChannelDialog(BuildContext context) {
     TextEditingController _controller = TextEditingController();
+
     showDialog(
       context: context,
       builder: (context) {
@@ -47,11 +48,13 @@ class ChatScreen extends StatelessWidget {
           content: TextField(controller: _controller),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_controller.text.isNotEmpty) {
-                  Provider.of<ChatProvider>(context, listen: false).addChannel(_controller.text);
+                  await Provider.of<ChatProvider>(context, listen: false)
+                      .addChannel(_controller.text); // Ждем завершения
+
+                  Navigator.pop(context); // Закрываем диалог после создания
                 }
-                Navigator.pop(context);
               },
               child: const Text("Создать"),
             ),

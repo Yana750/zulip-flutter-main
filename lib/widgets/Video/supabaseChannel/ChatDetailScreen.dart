@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../newMeeting.dart';
+import 'ChannelMeeting.dart';
 import 'ChatProvider.dart';
 
 class ChatDetailScreen extends StatefulWidget {

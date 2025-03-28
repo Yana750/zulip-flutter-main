@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'joinWithCode.dart';
-import 'newMeeting.dart';
 
 class ConferenceScreen extends StatelessWidget {
   const ConferenceScreen({super.key});

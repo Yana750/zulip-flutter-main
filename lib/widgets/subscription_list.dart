@@ -5,7 +5,7 @@ import '../api/core.dart';
 import '../api/model/model.dart';
 import '../model/narrow.dart';
 import '../model/unreads.dart';
-import 'Video/supabaseChannel/ChannelCreate.dart';
+import 'Video/supabaseChannel/Initializer.dart';
 import 'icons.dart';
 import 'message_list.dart';
 import 'store.dart';
@@ -187,20 +187,23 @@ class _SubscriptionListHeader extends StatelessWidget {
             line,
             const SizedBox(width: 8),
             GestureDetector(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                // Ждём инициализацию Supabase и получение главного виджета
+                Widget app = await AppInitializer.initialize();
+
+                // Переход на новый экран с полученным виджетом
+                await Navigator.push(
                   context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChannelCreate(),
-                    )
+                  MaterialPageRoute(
+                    builder: (context) => app,
+                  ),
                 );
               },
               child: Icon(
                 Icons.add,
                 color: designVariables.subscriptionListHeaderText,
               ),
-            ),
-            // const SizedBox(width: 16),
+            )
           ],
         ),
       ),

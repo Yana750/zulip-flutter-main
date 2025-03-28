@@ -4,14 +4,14 @@ import 'package:uuid/uuid.dart';
 
 class ChatProvider with ChangeNotifier {
   final SupabaseClient supabase = Supabase.instance.client;
-  final Uuid uuid = Uuid(); // Генератор уникальных ID
+  static const Uuid uuid = Uuid(); // Генератор уникальных ID
   List<ChatChannel> channels = [];
 
   ChatProvider() {
     _loadChannels();
   }
 
-  /// 📌 Загружаем каналы из Supabase
+  /// Загружаем каналы из Supabase
   Future<void> _loadChannels() async {
     final response = await supabase.from('channel').select();
 
@@ -27,28 +27,34 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  /// 📌 Создаем новый канал с постоянным `meeting_url`
+  /// Создаем новый канал с постоянным `meeting_url`
   Future<void> addChannel(String name) async {
     String meetingId = uuid.v4(); // Генерируем уникальный ID для встречи
     String jitsiUrl = "https://meet.jit.si/$meetingId"; // Создаем ссылку для Jitsi
 
-    final response = await supabase.from('channel').insert([
-      {
-        'name': name,
-        'meeting_url': jitsiUrl, // Добавляем URL видеозвонка
-      }
-    ]).select();
+    try {
+      final response = await supabase.from('channel').insert([
+        {
+          'name': name,
+          'meeting_url': jitsiUrl,
+        }
+      ]).select();
 
-    if (response.isNotEmpty) {
-      channels.add(ChatChannel(
-        id: (response[0]['id'] as num).toInt(), // Приводим к int
-        name: response[0]['name'] as String, // Приводим к String
-        meetingUrl: response[0]['meeting_url'] as String, // Приводим к String
-      ));
-      notifyListeners();
-    } else {
-      print("Ошибка создания канала.");
+      if (response.isNotEmpty) {
+        print("Канал успешно создан: ${response[0]}");
+        channels.add(ChatChannel(
+          id: (response[0]['id'] as num).toInt(),
+          name: response[0]['name'] as String,
+          meetingUrl: response[0]['meeting_url'] as String,
+        ));
+        notifyListeners();
+      } else {
+        print("Ошибка создания канала: пустой ответ.");
+      }
+    } catch (e) {
+      print("Ошибка при добавлении канала: $e");
     }
+
   }
 }
 
