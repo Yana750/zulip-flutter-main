@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-import '../api/core.dart';
 import '../api/model/model.dart';
 import '../model/narrow.dart';
 import '../model/unreads.dart';
-import 'Video/supabaseChannel/Initializer.dart';
 import 'icons.dart';
 import 'message_list.dart';
 import 'store.dart';
@@ -54,6 +51,67 @@ class _SubscriptionListPageBodyState extends State<SubscriptionListPageBody>
       return a.name.toLowerCase().compareTo(b.name.toLowerCase());
     });
   }
+  void _showCreateChannelDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    bool withCall = false;
+
+    // Получаем API заранее, в "живом" контексте, где точно есть PerAccountStoreWidget
+    final api = PerAccountStoreWidget.of(context).connection;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: const Text('Создать канал'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Название канала'),
+                ),
+                CheckboxListTile(
+                  value: withCall,
+                  onChanged: (val) => setState(() => withCall = val ?? false),
+                  title: const Text('Добавить видеозвонок'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+
+                  final streamName = nameController.text.trim();
+                  if (streamName.isEmpty) return;
+
+                  try {
+                    await api.createChannelWithCall(
+                      streamName: streamName,
+                      withCall: withCall,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Канал создан!')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Ошибка: $e')),
+                    );
+                  }
+                },
+                child: const Text('Создать'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,34 +145,39 @@ class _SubscriptionListPageBodyState extends State<SubscriptionListPageBody>
     _sortSubs(pinned);
     _sortSubs(unpinned);
 
-    return SafeArea(
-      // Don't pad the bottom here; we want the list content to do that.
-      bottom: false,
-      child: CustomScrollView(
-        slivers: [
-          if (pinned.isEmpty && unpinned.isEmpty) const _NoSubscriptionsItem(),
-          if (pinned.isNotEmpty) ...[
-            const _SubscriptionListHeader(label: "Pinned"),
-            _SubscriptionList(
-              unreadsModel: unreadsModel,
-              subscriptions: pinned,
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showCreateChannelDialog(context),
+        child: const Icon(Icons.add),
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: CustomScrollView(
+          slivers: [
+            if (pinned.isEmpty && unpinned.isEmpty) const _NoSubscriptionsItem(),
+            if (pinned.isNotEmpty) ...[
+              const _SubscriptionListHeader(label: "Pinned"),
+              _SubscriptionList(
+                unreadsModel: unreadsModel,
+                subscriptions: pinned,
+              ),
+            ],
+            if (unpinned.isNotEmpty) ...[
+              const _SubscriptionListHeader(label: "Unpinned"),
+              _SubscriptionList(
+                unreadsModel: unreadsModel,
+                subscriptions: unpinned,
+              ),
+            ],
+
+            // TODO(#188): add button leading to "All Streams" page with ability to subscribe
+
+            // This ensures last item in scrollable can settle in an unobstructed area.
+            const SliverSafeArea(
+              sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
             ),
           ],
-          if (unpinned.isNotEmpty) ...[
-            const _SubscriptionListHeader(label: "Unpinned"),
-            _SubscriptionList(
-              unreadsModel: unreadsModel,
-              subscriptions: unpinned,
-            ),
-          ],
-
-          // TODO(#188): add button leading to "All Streams" page with ability to subscribe
-
-          // This ensures last item in scrollable can settle in an unobstructed area.
-          const SliverSafeArea(
-            sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -185,25 +248,6 @@ class _SubscriptionListHeader extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             line,
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: () async {
-                // Ждём инициализацию Supabase и получение главного виджета
-                Widget app = await AppInitializer.initialize();
-
-                // Переход на новый экран с полученным виджетом
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => app,
-                  ),
-                );
-              },
-              child: Icon(
-                Icons.add,
-                color: designVariables.subscriptionListHeaderText,
-              ),
-            )
           ],
         ),
       ),

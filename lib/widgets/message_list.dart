@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_color_models/flutter_color_models.dart';
 import 'package:intl/intl.dart';
+import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 
 import '../api/model/model.dart';
 import '../generated/l10n/zulip_localizations.dart';
@@ -262,15 +263,65 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
 
     List<Widget>? actions;
     if (narrow case TopicNarrow(:final streamId)) {
-      // The helper [_getEffectiveCenterTitle] relies on the fact that we
-      // have at most one action here.
-      (actions ??= []).add(IconButton(
-        icon: const Icon(ZulipIcons.message_feed),
-        tooltip: zulipLocalizations.channelFeedButtonTooltip,
-        onPressed: () => Navigator.push(context,
-          MessageListPage.buildRoute(context: context,
-            narrow: ChannelNarrow(streamId)))));
+      final subscription = store.subscriptions[streamId];
+      final streamName = subscription?.name;
+
+      (actions ??= []).addAll([
+        IconButton(
+          icon: const Icon(Icons.videocam),
+          tooltip: 'Видеозвонок',
+          onPressed: () async {
+            if (streamName == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Имя канала не найдено')),
+              );
+              return;
+            }
+
+            try {
+              final userName = store.users[store.selfUserId]?.fullName ?? 'Пользователь';
+
+              var options = JitsiMeetConferenceOptions(
+                room: streamName,
+                serverURL: "https://jitsi-connectrm.ru:8443",
+                userInfo: JitsiMeetUserInfo(
+                  displayName: userName,
+                ),
+                configOverrides: {
+                  "startWithAudioMuted": false,
+                  "startWithVideoMuted": false,
+                  "disableInviteFunctions": true,
+                  "enableWelcomePage": false,  // Отключаем приветственную страницу
+                  "prejoinPageEnabled": false,  // Отключаем страницу предварительного подключения
+                  "preJoinPageHideDisplayName": true,  // Прячем поле для имени (если оно все-таки показывается)
+                },
+                featureFlags: {
+                  FeatureFlags.welcomePageEnabled: false,  // Отключаем приветственную страницу
+                  FeatureFlags.preJoinPageEnabled: false,  // Отключаем страницу предварительного подключения
+                },
+              );
+
+              final jitsi = JitsiMeet();
+              await jitsi.join(options);
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Ошибка подключения: $e")),
+              );
+            }
+          },
+        ),
+        IconButton(
+          icon: const Icon(ZulipIcons.message_feed),
+          tooltip: zulipLocalizations.channelFeedButtonTooltip,
+          onPressed: () => Navigator.push(context,
+              MessageListPage.buildRoute(
+                  context: context,
+                  narrow: ChannelNarrow(streamId))),
+        ),
+      ]);
     }
+
+
 
     return Scaffold(
       appBar: ZulipAppBar(

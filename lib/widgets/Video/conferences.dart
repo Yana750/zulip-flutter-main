@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'joinWithCode.dart';
+import 'supabaseChannel/ChannelMeeting.dart';
 
 class ConferenceScreen extends StatelessWidget {
   const ConferenceScreen({super.key});
@@ -16,12 +17,12 @@ class ConferenceScreen extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () {
                 //Создать новую встречу
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => MeetingReadyScreen(meetingUrl: channel.meetingUrl),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const JitsiMeetPage(),
+                  ),
+                );
               },
               label: const Text(
                 "Новая встреча",

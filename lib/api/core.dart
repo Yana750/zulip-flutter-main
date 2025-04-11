@@ -243,6 +243,41 @@ class ApiConnection {
     }
     return send(routeName, fromJson, request);
   }
+
+  Future<void> createChannelWithCall({
+    required String streamName,
+    bool withCall = false,
+  }) async {
+    // Шаг 1: создать канал
+    await post(
+      'createSubscription',
+          (json) => null,
+      'users/me/subscriptions',
+      {
+        'subscriptions': [
+          {'name': streamName}
+        ]
+      },
+    );
+
+    // Шаг 2: отправить ссылку на видеозвонок
+    if (withCall) {
+      final callUrl = 'https://meet.jit.si/${Uri.encodeComponent(streamName)}';
+
+      await post(
+        'sendMessage',
+            (json) => null,
+        'messages',
+        {
+          'type': 'stream',
+          'to': streamName,
+          'subject': 'Видео-встреча',
+          'content': 'Присоединиться к звонку: [$callUrl]($callUrl)',
+        },
+      );
+    }
+  }
+
 }
 
 ApiRequestException _makeApiException(String routeName, int httpStatus, Map<String, dynamic>? json) {
