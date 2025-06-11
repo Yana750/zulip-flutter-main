@@ -286,13 +286,13 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
 
               var options = JitsiMeetConferenceOptions(
                 room: roomName,
-                serverURL: "https://jitsi-connectrm.ru:8443",
+                serverURL: "https://jitsi-connectrm.ru",
                 userInfo: JitsiMeetUserInfo(
                   displayName: userName,
                 ),
                 configOverrides: {
-                  "startWithAudioMuted": false,
-                  "startWithVideoMuted": false,
+                  "startWithAudioMuted": true,
+                  "startWithVideoMuted": true,
                   "disableInviteFunctions": true,
                   "enableWelcomePage": false,
                   "prejoinPageEnabled": false,
