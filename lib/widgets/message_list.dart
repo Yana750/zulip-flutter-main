@@ -271,9 +271,9 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
           icon: const Icon(Icons.videocam),
           tooltip: 'Видеозвонок',
           onPressed: () async {
-            if (streamName == null) {
+            if (streamId == null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Имя канала не найдено')),
+                const SnackBar(content: Text('ID канала не найден')),
               );
               return;
             }
@@ -281,23 +281,26 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
             try {
               final userName = store.users[store.selfUserId]?.fullName ?? 'Пользователь';
 
+              // Формируем имя комнаты с использованием streamId
+              final roomName = 'channel_$streamId';
+
               var options = JitsiMeetConferenceOptions(
-                room: streamName,
-                serverURL: "https://jitsi-connectrm.ru:8443",
+                room: roomName,
+                serverURL: "https://jitsi-connectrm.ru",
                 userInfo: JitsiMeetUserInfo(
                   displayName: userName,
                 ),
                 configOverrides: {
-                  "startWithAudioMuted": false,
-                  "startWithVideoMuted": false,
+                  "startWithAudioMuted": true,
+                  "startWithVideoMuted": true,
                   "disableInviteFunctions": true,
-                  "enableWelcomePage": false,  // Отключаем приветственную страницу
-                  "prejoinPageEnabled": false,  // Отключаем страницу предварительного подключения
-                  "preJoinPageHideDisplayName": true,  // Прячем поле для имени (если оно все-таки показывается)
+                  "enableWelcomePage": false,
+                  "prejoinPageEnabled": false,
+                  "preJoinPageHideDisplayName": true,
                 },
                 featureFlags: {
-                  FeatureFlags.welcomePageEnabled: false,  // Отключаем приветственную страницу
-                  FeatureFlags.preJoinPageEnabled: false,  // Отключаем страницу предварительного подключения
+                  FeatureFlags.welcomePageEnabled: false,
+                  FeatureFlags.preJoinPageEnabled: false,
                 },
               );
 
@@ -320,8 +323,6 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
         ),
       ]);
     }
-
-
 
     return Scaffold(
       appBar: ZulipAppBar(

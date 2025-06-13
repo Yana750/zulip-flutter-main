@@ -10,6 +10,7 @@ import 'text.dart';
 import 'theme.dart';
 import 'unread_count_badge.dart';
 
+//Проверка git
 /// Scrollable listing of subscribed streams.
 class SubscriptionListPageBody extends StatefulWidget {
   const SubscriptionListPageBody({super.key});
