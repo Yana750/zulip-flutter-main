@@ -212,6 +212,7 @@ class MessageListPage extends StatefulWidget {
 class _MessageListPageState extends State<MessageListPage> implements MessageListPageState {
   @override
   late Narrow narrow;
+  bool _showJitsi = false;
 
   @override
   ComposeBoxController? get composeBoxController => _composeBoxKey.currentState?.controller;
@@ -242,22 +243,18 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
       case CombinedFeedNarrow():
       case MentionsNarrow():
       case StarredMessagesNarrow():
-        appBarBackgroundColor = null; // i.e., inherit
+        appBarBackgroundColor = null;
 
       case ChannelNarrow(:final streamId):
       case TopicNarrow(:final streamId):
         final subscription = store.subscriptions[streamId];
         appBarBackgroundColor = subscription != null
-          ? colorSwatchFor(context, subscription).barBackground
-          : messageListTheme.unsubscribedStreamRecipientHeaderBg;
-        // All recipient headers will match this color; remove distracting line
-        // (but are recipient headers even needed for topic narrows?)
+            ? colorSwatchFor(context, subscription).barBackground
+            : messageListTheme.unsubscribedStreamRecipientHeaderBg;
         removeAppBarBottomBorder = true;
 
       case DmNarrow():
         appBarBackgroundColor = messageListTheme.dmRecipientHeaderBg;
-        // All recipient headers will match this color; remove distracting line
-        // (but are recipient headers even needed?)
         removeAppBarBottomBorder = true;
     }
 
@@ -278,48 +275,44 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
               return;
             }
 
-            try {
-              final userName = store.users[store.selfUserId]?.fullName ?? 'Пользователь';
+            final userName = store.users[store.selfUserId]?.fullName ?? 'Пользователь';
+            final roomName = 'channel_$streamId';
 
-              // Формируем имя комнаты с использованием streamId
-              final roomName = 'channel_$streamId';
-
-              var options = JitsiMeetConferenceOptions(
+            final jitsi = JitsiMeet();
+            await jitsi.join(
+              JitsiMeetConferenceOptions(
                 room: roomName,
                 serverURL: "https://jitsi-connectrm.ru",
-                userInfo: JitsiMeetUserInfo(
-                  displayName: userName,
-                ),
+                userInfo: JitsiMeetUserInfo(displayName: userName),
                 configOverrides: {
                   "startWithAudioMuted": true,
                   "startWithVideoMuted": true,
                   "disableInviteFunctions": true,
                   "enableWelcomePage": false,
                   "prejoinPageEnabled": false,
-                  "preJoinPageHideDisplayName": true,
                 },
                 featureFlags: {
                   FeatureFlags.welcomePageEnabled: false,
                   FeatureFlags.preJoinPageEnabled: false,
                 },
-              );
+              ),
+            );
 
-              final jitsi = JitsiMeet();
-              await jitsi.join(options);
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Ошибка подключения: $e")),
-              );
-            }
+            setState(() {
+              _showJitsi = true;
+            });
           },
         ),
         IconButton(
           icon: const Icon(ZulipIcons.message_feed),
           tooltip: zulipLocalizations.channelFeedButtonTooltip,
-          onPressed: () => Navigator.push(context,
-              MessageListPage.buildRoute(
-                  context: context,
-                  narrow: ChannelNarrow(streamId))),
+          onPressed: () => Navigator.push(
+            context,
+            MessageListPage.buildRoute(
+              context: context,
+              narrow: ChannelNarrow(streamId),
+            ),
+          ),
         ),
       ]);
     }
@@ -329,36 +322,55 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
         title: MessageListAppBarTitle(narrow: narrow),
         actions: actions,
         backgroundColor: appBarBackgroundColor,
-        shape: removeAppBarBottomBorder
-          ? const Border()
-          : null, // i.e., inherit
+        shape: removeAppBarBottomBorder ? const Border() : null,
       ),
-      // TODO question for Vlad: for a stream view, should we set the Scaffold's
-      //   [backgroundColor] based on stream color, as in this frame:
-      //     https://www.figma.com/file/1JTNtYo9memgW7vV6d0ygq/Zulip-Mobile?node-id=132%3A9684&mode=dev
-      //   That's not obviously preferred over the default background that
-      //   we matched to the Figma in 21dbae120. See another frame, which uses that:
-      //     https://www.figma.com/file/1JTNtYo9memgW7vV6d0ygq/Zulip-Mobile?node-id=147%3A9088&mode=dev
-      body: Builder(
-        builder: (BuildContext context) => Center(
-          child: Column(children: [
-            MediaQuery.removePadding(
-              // Scaffold knows about the app bar, and so has run this
-              // BuildContext, which is under `body`, through
-              // MediaQuery.removePadding with `removeTop: true`.
-              context: context,
-
-              // The compose box, when present, pads the bottom inset.
-              // TODO(#311) If we have a bottom nav, it will pad the bottom
-              //   inset, and this should always be true.
-              removeBottom: ComposeBox.hasComposeBox(narrow),
-
-              child: Expanded(
-                child: MessageList(narrow: narrow, onNarrowChanged: _narrowChanged))),
-            if (ComposeBox.hasComposeBox(narrow))
-              ComposeBox(key: _composeBoxKey, narrow: narrow)
-          ]))));
+      body: SafeArea( // 👈 ДОБАВЛЕНО
+        child: Builder(
+          builder: (BuildContext context) => Center(
+            child: Column(children: [
+              Expanded(
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeBottom: ComposeBox.hasComposeBox(narrow),
+                  child: MessageList(
+                    narrow: narrow,
+                    onNarrowChanged: _narrowChanged,
+                  ),
+                ),
+              ),
+              if (_showJitsi)
+                Column(
+                  children: [
+                    Container(
+                      height: 80,
+                      color: Colors.black,
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Видеозвонок активен',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.call_end, color: Colors.red),
+                      label: const Text('Завершить звонок'),
+                      onPressed: () {
+                        JitsiMeet().hangUp();
+                        setState(() {
+                          _showJitsi = false;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              if (ComposeBox.hasComposeBox(narrow))
+                ComposeBox(key: _composeBoxKey, narrow: narrow),
+            ]),
+          ),
+        ),
+      ),
+    );
   }
+
 }
 
 class MessageListAppBarTitle extends StatelessWidget {
