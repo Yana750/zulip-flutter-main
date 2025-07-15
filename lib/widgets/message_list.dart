@@ -275,6 +275,7 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
               return;
             }
 
+
             final userName = store.users[store.selfUserId]?.fullName ?? 'Пользователь';
             final roomName = 'channel_$streamId';
 
