@@ -64,7 +64,7 @@ dependencies:
   wakelock_plus: ^1.2.8
   zulip_plugin:
     path: ./packages/zulip_plugin
-  jitsi_meet_flutter_sdk: ^10.3.0
+  jitsi_meet_flutter_sdk: ^11.2.0
   uuid: ^4.5.1
   provider: ^6.1.2
   supabase_flutter: ^2.8.4

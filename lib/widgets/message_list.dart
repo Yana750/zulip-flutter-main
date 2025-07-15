@@ -213,11 +213,11 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
   @override
   late Narrow narrow;
   bool _showJitsi = false;
+  final jitsiMeet = JitsiMeet();
+  final GlobalKey<ComposeBoxState> _composeBoxKey = GlobalKey();
 
   @override
   ComposeBoxController? get composeBoxController => _composeBoxKey.currentState?.controller;
-
-  final GlobalKey<ComposeBoxState> _composeBoxKey = GlobalKey();
 
   @override
   void initState() {
@@ -239,7 +239,7 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
 
     final Color? appBarBackgroundColor;
     bool removeAppBarBottomBorder = false;
-    switch(narrow) {
+    switch (narrow) {
       case CombinedFeedNarrow():
       case MentionsNarrow():
       case StarredMessagesNarrow():
@@ -278,8 +278,7 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
             final userName = store.users[store.selfUserId]?.fullName ?? 'Пользователь';
             final roomName = 'channel_$streamId';
 
-            final jitsi = JitsiMeet();
-            await jitsi.join(
+            await jitsiMeet.join(
               JitsiMeetConferenceOptions(
                 room: roomName,
                 serverURL: "https://jitsi-connectrm.ru",
@@ -297,7 +296,6 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
                 },
               ),
             );
-
             setState(() {
               _showJitsi = true;
             });
@@ -324,7 +322,7 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
         backgroundColor: appBarBackgroundColor,
         shape: removeAppBarBottomBorder ? const Border() : null,
       ),
-      body: SafeArea( // 👈 ДОБАВЛЕНО
+      body: SafeArea(
         child: Builder(
           builder: (BuildContext context) => Center(
             child: Column(children: [
@@ -341,20 +339,12 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
               if (_showJitsi)
                 Column(
                   children: [
-                    Container(
-                      height: 80,
-                      color: Colors.black,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Видеозвонок активен',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
+                    const SizedBox(height: 10),
                     TextButton.icon(
                       icon: const Icon(Icons.call_end, color: Colors.red),
                       label: const Text('Завершить звонок'),
-                      onPressed: () {
-                        JitsiMeet().hangUp();
+                      onPressed: () async {
+                        await jitsiMeet.hangUp();
                         setState(() {
                           _showJitsi = false;
                         });
@@ -370,7 +360,6 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
       ),
     );
   }
-
 }
 
 class MessageListAppBarTitle extends StatelessWidget {
