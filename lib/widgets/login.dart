@@ -114,11 +114,11 @@ class _AddAccountPageState extends State<AddAccountPage> {
   void initState() {
     super.initState();
 
-    // Жёстко заданный URL сервера - ЗАМЕНИТЕ НА СВОЙ
+    // Жёстко заданный URL сервера
     const hardcodedServerUrl = 'https://joinrm-svz.ru/join/54abgjaba2l5otejrejrgh3v/';
     final uri = Uri.parse(hardcodedServerUrl);
 
-    // Автоматически загружаем настройки сервера и переходим к экрану входа
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final globalStore = GlobalStoreWidget.of(context);
       final connection = globalStore.apiConnection(realmUrl: uri, zulipFeatureLevel: null);
