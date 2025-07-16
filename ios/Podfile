@@ -1,6 +1,6 @@
 # This should match the iOS Deployment Target
 # (in Xcode, that's in project > Runner > Info)
-platform :ios, '14.0'
+platform :ios, '15.1'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
