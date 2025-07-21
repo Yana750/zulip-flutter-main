@@ -22,7 +22,7 @@ try {
 android {
     namespace "com.zulip.flutter"
 
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 35
 
     ndkVersion = "26.3.11579264"
 
@@ -42,7 +42,7 @@ android {
     defaultConfig {
         applicationId "com.zulip.flutter"
         minSdkVersion 28
-        targetSdkVersion flutter.targetSdkVersion
+        targetSdkVersion 33
         // These are synced to local.properties from pubspec.yaml by the flutter tool.
         versionCode localProperties.getProperty('flutter.versionCode').toInteger()
         versionName localProperties.getProperty('flutter.versionName')
@@ -80,6 +80,13 @@ android {
         checkAllWarnings = true
         warningsAsErrors = true
     }
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.media3:media3-exoplayer-rtsp:1.4.1'
+            exclude group: 'androidx.media3', module: 'media3-exoplayer-rtsp'
+            exclude group: 'com.facebook.react', module: 'react-native-video'
+        }
+    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
@@ -98,4 +105,9 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    implementation ('org.jitsi.react:jitsi-meet-sdk:11.3.1') {
+        transitive = true
+        exclude group: 'androidx.media3', module: 'media3-exoplayer-rtsp'
+        exclude group: 'com.facebook.react', module: 'react-native-video'
+    }
 }

@@ -19,6 +19,7 @@ import 'compose_box.dart';
 import 'content.dart';
 import 'emoji_reaction.dart';
 import 'icons.dart';
+import 'jitsimeetview.dart';
 import 'page.dart';
 import 'profile.dart';
 import 'sticky_header.dart';
@@ -185,18 +186,18 @@ abstract class MessageListPageState {
 class MessageListPage extends StatefulWidget {
   const MessageListPage({super.key, required this.initNarrow});
 
-  static Route<void> buildRoute({int? accountId, BuildContext? context,
-    required Narrow narrow}) {
-    return MaterialAccountWidgetRoute(accountId: accountId, context: context,
-        page: MessageListPage(initNarrow: narrow));
+  static Route<void> buildRoute({
+    int? accountId,
+    BuildContext? context,
+    required Narrow narrow,
+  }) {
+    return MaterialAccountWidgetRoute(
+      accountId: accountId,
+      context: context,
+      page: MessageListPage(initNarrow: narrow),
+    );
   }
 
-  /// The [MessageListPageState] above this context in the tree.
-  ///
-  /// Uses the inefficient [BuildContext.findAncestorStateOfType];
-  /// don't call this in a build method.
-  // If we do find ourselves wanting this in a build method, it won't be hard
-  // to enable that: we'd just need to add an [InheritedWidget] here.
   static MessageListPageState ancestorOf(BuildContext context) {
     final state = context.findAncestorStateOfType<_MessageListPageState>();
     assert(state != null, 'No MessageListPage ancestor');
@@ -213,7 +214,8 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
   @override
   late Narrow narrow;
   bool _showJitsi = false;
-  final jitsiMeet = JitsiMeet();
+  String? _activeRoom;
+
   final GlobalKey<ComposeBoxState> _composeBoxKey = GlobalKey();
 
   @override
@@ -239,6 +241,8 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
 
     final Color? appBarBackgroundColor;
     bool removeAppBarBottomBorder = false;
+
+    int? currentStreamId;
     switch (narrow) {
       case CombinedFeedNarrow():
       case MentionsNarrow():
@@ -247,6 +251,7 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
 
       case ChannelNarrow(:final streamId):
       case TopicNarrow(:final streamId):
+        currentStreamId = streamId;
         final subscription = store.subscriptions[streamId];
         appBarBackgroundColor = subscription != null
             ? colorSwatchFor(context, subscription).barBackground
@@ -259,45 +264,16 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
     }
 
     List<Widget>? actions;
-    if (narrow case TopicNarrow(:final streamId)) {
-      final subscription = store.subscriptions[streamId];
-      final streamName = subscription?.name;
+    if (currentStreamId != null) {
+      final roomName = 'channel_$currentStreamId';
 
       (actions ??= []).addAll([
         IconButton(
           icon: const Icon(Icons.videocam),
           tooltip: 'Видеозвонок',
-          onPressed: () async {
-            if (streamId == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('ID канала не найден')),
-              );
-              return;
-            }
-
-
-            final userName = store.users[store.selfUserId]?.fullName ?? 'Пользователь';
-            final roomName = 'channel_$streamId';
-
-            await jitsiMeet.join(
-              JitsiMeetConferenceOptions(
-                room: roomName,
-                serverURL: "https://jitsi-connectrm.ru",
-                userInfo: JitsiMeetUserInfo(displayName: userName),
-                configOverrides: {
-                  "startWithAudioMuted": true,
-                  "startWithVideoMuted": true,
-                  "disableInviteFunctions": true,
-                  "enableWelcomePage": false,
-                  "prejoinPageEnabled": false,
-                },
-                featureFlags: {
-                  FeatureFlags.welcomePageEnabled: false,
-                  FeatureFlags.preJoinPageEnabled: false,
-                },
-              ),
-            );
+          onPressed: () {
             setState(() {
+              _activeRoom = roomName;
               _showJitsi = true;
             });
           },
@@ -309,7 +285,7 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
             context,
             MessageListPage.buildRoute(
               context: context,
-              narrow: ChannelNarrow(streamId),
+              narrow: ChannelNarrow(currentStreamId!),
             ),
           ),
         ),
@@ -327,6 +303,22 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
         child: Builder(
           builder: (BuildContext context) => Center(
             child: Column(children: [
+              if (_showJitsi && _activeRoom != null) ...[
+                SizedBox(
+                  height: 400,
+                  child: JitsiMeetView(roomName: _activeRoom!),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _showJitsi = false;
+                      _activeRoom = null;
+                    });
+                  },
+                  icon: const Icon(Icons.call_end, color: Colors.red),
+                  label: const Text('Завершить звонок'),
+                ),
+              ],
               Expanded(
                 child: MediaQuery.removePadding(
                   context: context,
@@ -337,22 +329,6 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
                   ),
                 ),
               ),
-              if (_showJitsi)
-                Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    TextButton.icon(
-                      icon: const Icon(Icons.call_end, color: Colors.red),
-                      label: const Text('Завершить звонок'),
-                      onPressed: () async {
-                        await jitsiMeet.hangUp();
-                        setState(() {
-                          _showJitsi = false;
-                        });
-                      },
-                    ),
-                  ],
-                ),
               if (ComposeBox.hasComposeBox(narrow))
                 ComposeBox(key: _composeBoxKey, narrow: narrow),
             ]),
