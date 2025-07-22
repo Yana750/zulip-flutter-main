@@ -67,7 +67,8 @@ import 'zulip_localizations_sk.dart';
 /// be consistent with the languages listed in the ZulipLocalizations.supportedLocales
 /// property.
 abstract class ZulipLocalizations {
-  ZulipLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  ZulipLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -75,7 +76,8 @@ abstract class ZulipLocalizations {
     return Localizations.of<ZulipLocalizations>(context, ZulipLocalizations)!;
   }
 
-  static const LocalizationsDelegate<ZulipLocalizations> delegate = _ZulipLocalizationsDelegate();
+  static const LocalizationsDelegate<ZulipLocalizations> delegate =
+      _ZulipLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -87,12 +89,13 @@ abstract class ZulipLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -102,7 +105,7 @@ abstract class ZulipLocalizations {
     Locale('nb'),
     Locale('pl'),
     Locale('ru'),
-    Locale('sk')
+    Locale('sk'),
   ];
 
   /// Title for About Zulip page.
@@ -325,7 +328,11 @@ abstract class ZulipLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{num, plural, =1{File is} other{{num} files are}} larger than the server\'s limit of {maxFileUploadSizeMib} MiB and will not be uploaded:\n\n{listMessage}'**
-  String errorFilesTooLarge(int num, int maxFileUploadSizeMib, String listMessage);
+  String errorFilesTooLarge(
+    int num,
+    int maxFileUploadSizeMib,
+    String listMessage,
+  );
 
   /// Error title when attached files are too large in size.
   ///
@@ -403,7 +410,11 @@ abstract class ZulipLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Error handling a Zulip event from {serverUrl}; will retry.\n\nError: {error}\n\nEvent: {event}'**
-  String errorHandlingEventDetails(String serverUrl, String error, String event);
+  String errorHandlingEventDetails(
+    String serverUrl,
+    String error,
+    String event,
+  );
 
   /// Error message when muting a topic failed.
   ///
@@ -1018,39 +1029,55 @@ abstract class ZulipLocalizations {
   String get emojiPickerSearchEmoji;
 }
 
-class _ZulipLocalizationsDelegate extends LocalizationsDelegate<ZulipLocalizations> {
+class _ZulipLocalizationsDelegate
+    extends LocalizationsDelegate<ZulipLocalizations> {
   const _ZulipLocalizationsDelegate();
 
   @override
   Future<ZulipLocalizations> load(Locale locale) {
-    return SynchronousFuture<ZulipLocalizations>(lookupZulipLocalizations(locale));
+    return SynchronousFuture<ZulipLocalizations>(
+      lookupZulipLocalizations(locale),
+    );
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en', 'ja', 'nb', 'pl', 'ru', 'sk'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'ar',
+    'en',
+    'ja',
+    'nb',
+    'pl',
+    'ru',
+    'sk',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_ZulipLocalizationsDelegate old) => false;
 }
 
 ZulipLocalizations lookupZulipLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar': return ZulipLocalizationsAr();
-    case 'en': return ZulipLocalizationsEn();
-    case 'ja': return ZulipLocalizationsJa();
-    case 'nb': return ZulipLocalizationsNb();
-    case 'pl': return ZulipLocalizationsPl();
-    case 'ru': return ZulipLocalizationsRu();
-    case 'sk': return ZulipLocalizationsSk();
+    case 'ar':
+      return ZulipLocalizationsAr();
+    case 'en':
+      return ZulipLocalizationsEn();
+    case 'ja':
+      return ZulipLocalizationsJa();
+    case 'nb':
+      return ZulipLocalizationsNb();
+    case 'pl':
+      return ZulipLocalizationsPl();
+    case 'ru':
+      return ZulipLocalizationsRu();
+    case 'sk':
+      return ZulipLocalizationsSk();
   }
 
   throw FlutterError(
     'ZulipLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

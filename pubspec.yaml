@@ -15,7 +15,7 @@ environment:
   # the corresponding recent version of the Dart SDK.
   # Feel free to update these regularly; see README.md for instructions.
   sdk: '>=3.7.0-209.0.beta <4.0.0'
-  flutter: '>=3.28.0-0.1.pre'  # 65ff060283e19423e9538c18c24e44495b70aeff
+  flutter: '>=3.34.0-0.1.pre'  # 65ff060283e19423e9538c18c24e44495b70aeff
 
 # To update dependencies, see instructions in README.md.
 dependencies:
