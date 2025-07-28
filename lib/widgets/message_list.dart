@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_color_models/flutter_color_models.dart';
 import 'package:intl/intl.dart';
-import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 
 import '../api/model/model.dart';
 import '../generated/l10n/zulip_localizations.dart';
@@ -19,7 +18,7 @@ import 'compose_box.dart';
 import 'content.dart';
 import 'emoji_reaction.dart';
 import 'icons.dart';
-import 'jitsimeetview.dart';
+import 'jitsi_call_page.dart';
 import 'page.dart';
 import 'profile.dart';
 import 'sticky_header.dart';
@@ -213,8 +212,6 @@ class MessageListPage extends StatefulWidget {
 class _MessageListPageState extends State<MessageListPage> implements MessageListPageState {
   @override
   late Narrow narrow;
-  bool _showJitsi = false;
-  String? _activeRoom;
 
   final GlobalKey<ComposeBoxState> _composeBoxKey = GlobalKey();
 
@@ -272,10 +269,14 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
           icon: const Icon(Icons.videocam),
           tooltip: 'Видеозвонок',
           onPressed: () {
-            setState(() {
-              _activeRoom = roomName;
-              _showJitsi = true;
-            });
+            final roomName = 'channel_$currentStreamId';
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => JitsiCallPage(roomName: roomName),
+                settings: RouteSettings(arguments: roomName),
+              ),
+            );
           },
         ),
         IconButton(
@@ -303,22 +304,6 @@ class _MessageListPageState extends State<MessageListPage> implements MessageLis
         child: Builder(
           builder: (BuildContext context) => Center(
             child: Column(children: [
-              if (_showJitsi && _activeRoom != null) ...[
-                SizedBox(
-                  height: 400,
-                  child: JitsiMeetView(roomName: _activeRoom!),
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _showJitsi = false;
-                      _activeRoom = null;
-                    });
-                  },
-                  icon: const Icon(Icons.call_end, color: Colors.red),
-                  label: const Text('Завершить звонок'),
-                ),
-              ],
               Expanded(
                 child: MediaQuery.removePadding(
                   context: context,
