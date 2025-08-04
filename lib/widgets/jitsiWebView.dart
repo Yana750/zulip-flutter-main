@@ -4,7 +4,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 class JitsiWebView extends StatefulWidget {
   final String roomUrl;
 
-  const JitsiWebView({Key? key, required this.roomUrl}) : super(key: key);
+  const JitsiWebView({super.key, required this.roomUrl});
 
   @override
   State<JitsiWebView> createState() => _JitsiWebViewState();
@@ -27,6 +27,11 @@ class _JitsiWebViewState extends State<JitsiWebView> {
             mediaPlaybackRequiresUserGesture: false,
           ),
           android: AndroidInAppWebViewOptions(useHybridComposition: true),
+          ios: IOSInAppWebViewOptions(
+            allowsInlineMediaPlayback: true,
+            allowsPictureInPictureMediaPlayback: true,
+            allowsAirPlayForMediaPlayback: false,
+          )
         ),
         onWebViewCreated: (controller) {
           _webViewController = controller;
