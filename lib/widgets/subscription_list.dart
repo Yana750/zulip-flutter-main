@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api/model/model.dart';
 import '../model/narrow.dart';
 import '../model/unreads.dart';
+import 'customButton.dart';
 import 'icons.dart';
 import 'message_list.dart';
 import 'store.dart';
@@ -80,9 +81,14 @@ class _SubscriptionListPageBodyState extends State<SubscriptionListPageBody>
               ],
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Отмена'),
+              const SizedBox(
+                height: 60,
+                width: 200,
+                child: NativeButton(
+                  color: "#E32636",
+                  radius: 50, // скруглённые углы
+                  label: "Моя кнопка",
+                ),
               ),
               TextButton(
                 onPressed: () async {
